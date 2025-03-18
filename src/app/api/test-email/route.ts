@@ -50,18 +50,14 @@ export async function POST() {
       booking: testBooking
     };
 
-    const result = await sendEmailNotification('test@example.com', testData);
+    await sendEmailNotification('test@example.com', testData);
 
     // Очищаем тестовые данные
     await prisma.booking.delete({ where: { id: testBooking.id } });
     await prisma.pet.delete({ where: { id: testPet.id } });
     await prisma.user.delete({ where: { id: testUser.id } });
 
-    if (result) {
-      return NextResponse.json({ success: true, message: "Тестовое письмо отправлено" });
-    } else {
-      return NextResponse.json({ success: false, message: "Не удалось отправить тестовое письмо" });
-    }
+    return NextResponse.json({ success: true, message: "Тестовое письмо отправлено" });
   } catch (error) {
     console.error('Error sending test email:', error);
     return NextResponse.json(
