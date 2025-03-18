@@ -9,21 +9,21 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#3B82F6',
-          light: '#60A5FA',
-          dark: '#2563EB',
+          DEFAULT: '#F59E0B', // оранжевый
+          light: '#FBBF24',
+          dark: '#D97706',
         },
         secondary: {
-          DEFAULT: '#10B981',
-          light: '#34D399',
-          dark: '#059669',
+          DEFAULT: '#22C55E', // зеленый
+          light: '#4ADE80',
+          dark: '#16A34A',
         },
         accent: {
-          DEFAULT: '#F3F4F6',
-          light: '#F9FAFB',
-          dark: '#E5E7EB',
+          DEFAULT: '#FEF3C7', // желтый
+          light: '#FEF9C3',
+          dark: '#FDE68A',
         },
-        warm: '#FEF3C7',
+        warm: '#92400E', // коричневый
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
