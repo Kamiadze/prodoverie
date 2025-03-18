@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { Session } from 'next-auth'
 import bcryptjs from 'bcryptjs'
+import { sendEmailNotification } from '@/utils/notifications'
 
 interface Pet {
   name: string
@@ -88,6 +89,19 @@ export async function POST(request: Request) {
         user: true
       }
     })
+
+    // Отправляем email-уведомление
+    if (booking.user.email) {
+      try {
+        await sendEmailNotification(booking.user.email, {
+          type: 'booking_status_update',
+          booking
+        })
+        console.log('Email notification sent successfully')
+      } catch (emailError) {
+        console.error('Error sending email:', emailError)
+      }
+    }
 
     return NextResponse.json({ booking })
   } catch (error) {

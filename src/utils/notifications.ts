@@ -15,10 +15,6 @@ const transporter = nodemailer.createTransport({
 transporter.verify(function(error, success) {
   if (error) {
     console.error('Email transport error:', error);
-    console.log('Email credentials:', {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD ? '***' : 'not set'
-    });
   } else {
     console.log('Email server is ready to send messages');
   }
@@ -49,10 +45,43 @@ interface NotificationData {
 
 export async function sendEmailNotification(email: string, data: NotificationData) {
   try {
-    // Здесь будет логика отправки email
-    console.log('Sending email notification:', { email, data })
+    let subject = '';
+    let text = '';
+    let html = '';
+
+    switch (data.type) {
+      case 'booking_status_update':
+        subject = `Обновление статуса бронирования - ${data.booking.pet.name}`;
+        text = `Уважаемый(ая) ${data.booking.user.name},\n\n` +
+               `Статус бронирования для вашего питомца "${data.booking.pet.name}" был обновлен.\n` +
+               `Новый статус: ${data.booking.status}\n` +
+               `Даты: ${data.booking.startDate.toLocaleDateString()} - ${data.booking.endDate.toLocaleDateString()}\n\n` +
+               `С уважением,\nКоманда ZooHotel`;
+        
+        html = `
+          <h2>Уважаемый(ая) ${data.booking.user.name},</h2>
+          <p>Статус бронирования для вашего питомца "${data.booking.pet.name}" был обновлен.</p>
+          <p><strong>Новый статус:</strong> ${data.booking.status}</p>
+          <p><strong>Даты:</strong> ${data.booking.startDate.toLocaleDateString()} - ${data.booking.endDate.toLocaleDateString()}</p>
+          <p>С уважением,<br>Команда ZooHotel</p>
+        `;
+        break;
+    }
+
+    const mailOptions = {
+      from: 'tiunoff.ivashka@yandex.ru',
+      to: email,
+      subject: subject,
+      text: text,
+      html: html
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully to:', email);
+    return true;
   } catch (error) {
-    console.error('Error sending email notification:', error)
+    console.error('Error sending email notification:', error);
+    return false;
   }
 }
 
