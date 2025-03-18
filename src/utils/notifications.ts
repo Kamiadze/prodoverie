@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import twilio from 'twilio';
 import { Booking } from '@prisma/client'
 
 // Конфигурация для nodemailer
@@ -20,19 +19,20 @@ transporter.verify(function(error, success) {
   }
 });
 
-// Конфигурация для Twilio
-let twilioClient: twilio.Twilio | null = null;
+// Конфигурация для Twilio (опционально)
+let twilioClient: any = null;
 
-if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-  try {
+try {
+  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+    const twilio = require('twilio');
     twilioClient = twilio(
       process.env.TWILIO_ACCOUNT_SID,
       process.env.TWILIO_AUTH_TOKEN
     );
     console.log('Twilio client initialized successfully');
-  } catch (error) {
-    console.error('Failed to initialize Twilio client:', error);
   }
+} catch (error) {
+  console.log('Twilio is not available:', error);
 }
 
 interface NotificationData {
@@ -59,37 +59,48 @@ export async function sendEmailNotification(email: string, data: NotificationDat
                `С уважением,\nКоманда ZooHotel`;
         
         html = `
-          <h2>Уважаемый(ая) ${data.booking.user.name},</h2>
-          <p>Статус бронирования для вашего питомца "${data.booking.pet.name}" был обновлен.</p>
-          <p><strong>Новый статус:</strong> ${data.booking.status}</p>
-          <p><strong>Даты:</strong> ${data.booking.startDate.toLocaleDateString()} - ${data.booking.endDate.toLocaleDateString()}</p>
-          <p>С уважением,<br>Команда ZooHotel</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #4F46E5;">Обновление статуса бронирования</h2>
+            <p>Уважаемый(ая) ${data.booking.user.name},</p>
+            <p>Статус бронирования для вашего питомца "${data.booking.pet.name}" был обновлен.</p>
+            <p><strong>Новый статус:</strong> ${data.booking.status}</p>
+            <p><strong>Даты:</strong> ${data.booking.startDate.toLocaleDateString()} - ${data.booking.endDate.toLocaleDateString()}</p>
+            <p>С уважением,<br>Команда ZooHotel</p>
+          </div>
         `;
         break;
     }
 
-    const mailOptions = {
+    await transporter.sendMail({
       from: 'tiunoff.ivashka@yandex.ru',
       to: email,
       subject: subject,
       text: text,
       html: html
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully to:', email);
     return true;
   } catch (error) {
-    console.error('Error sending email notification:', error);
+    console.error('Error sending email:', error);
     return false;
   }
 }
 
-export async function sendSMSNotification(phone: string, data: NotificationData) {
+export async function sendSMSNotification(phone: string, message: string) {
+  if (!twilioClient) {
+    console.log('SMS notifications are not available (Twilio is not configured)');
+    return false;
+  }
+
   try {
-    // Здесь будет логика отправки SMS
-    console.log('Sending SMS notification:', { phone, data })
+    await twilioClient.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: phone
+    });
+    return true;
   } catch (error) {
-    console.error('Error sending SMS notification:', error)
+    console.error('Error sending SMS:', error);
+    return false;
   }
 } 
