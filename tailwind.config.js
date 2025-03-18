@@ -24,6 +24,16 @@ module.exports = {
           dark: '#FDE68A',
         },
         warm: '#92400E', // коричневый
+        beige: {
+          DEFAULT: '#F5F5DC', // бежевый
+          light: '#FAFAF0',
+          dark: '#E8E8D0',
+        },
+        brown: {
+          DEFAULT: '#8B4513', // коричневый
+          light: '#A0522D',
+          dark: '#654321',
+        }
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
