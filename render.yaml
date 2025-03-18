@@ -11,9 +11,15 @@ services:
         generateValue: true
       - key: NEXTAUTH_URL
         sync: false
-      - key: EMAIL_USER
+      - key: EMAIL_SERVER_HOST
         sync: false
-      - key: EMAIL_PASSWORD
+      - key: EMAIL_SERVER_PORT
+        sync: false
+      - key: EMAIL_SERVER_USER
+        sync: false
+      - key: EMAIL_SERVER_PASSWORD
+        sync: false
+      - key: EMAIL_FROM
         sync: false
       - key: TWILIO_ACCOUNT_SID
         sync: false

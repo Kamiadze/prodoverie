@@ -9,62 +9,62 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
+  id        String   @id @default(uuid())
+  email     String   @unique
+  phone     String?
   password  String
   name      String
-  phone     String    // Добавляем поле phone
-  role      String    @default("user")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   bookings  Booking[]
   pets      Pet[]
 }
 
 model Pet {
-  id        String    @id @default(cuid())
-  name      String
-  type      String
-  breed     String?
-  age       Int
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  ownerId   String
-  owner     User      @relation(fields: [ownerId], references: [id])
-  bookings  Booking[]
+  id          String   @id @default(uuid())
+  name        String
+  type        String
+  breed       String?
+  age         Int
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  bookings    Booking[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Booking {
-  id              String    @id @default(cuid())
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  startDate       DateTime
-  endDate         DateTime
-  status          String
-  notes           String?
-  roomType        String
-  userId          String
-  petId           String
-  sharedWithPetId String?   // Добавляем поле sharedWithPetId
-  user            User      @relation(fields: [userId], references: [id])
-  pet             Pet       @relation(fields: [petId], references: [id])
+  id          String   @id @default(uuid())
+  startDate   DateTime
+  endDate     DateTime
+  status      String   @default("pending")
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  roomType    String
+  notes       String?
+  sharedWithPetId String? // ID питомца, с которым делится вольер
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Room {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  type      String
-  price     Int
-  capacity  Int
-  available Int
-  total     Int      // Убедимся, что поле total существует
-  petType   String
+  id          String   @id @default(uuid())
+  type        String   @unique
+  price       Float
+  capacity    Int      @default(1)
+  available   Int
+  total       Int
+  petType     String   // тип животного: "cat", "dog", "other"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Message {
