@@ -114,10 +114,9 @@ export async function PATCH(
 
     if (booking.user.phone) {
       try {
-        await sendSMSNotification(booking.user.phone, {
-          type: 'booking_status_update',
-          booking
-        })
+        await sendSMSNotification(booking.user.phone, 
+          `Уважаемый(ая) ${booking.user.name}, статус бронирования для вашего питомца "${booking.pet.name}" был обновлен на "${booking.status}". Даты: ${booking.startDate.toLocaleDateString()} - ${booking.endDate.toLocaleDateString()}`
+        )
         console.log('SMS notification sent successfully')
       } catch (smsError) {
         console.error('Error sending SMS:', smsError)
