@@ -82,15 +82,15 @@ body {
 /* FullCalendar styles */
 .fc {
   --fc-border-color: #E5E7EB;
-  --fc-button-bg-color: #4F46E5;
-  --fc-button-border-color: #4F46E5;
-  --fc-button-hover-bg-color: #4338CA;
-  --fc-button-hover-border-color: #4338CA;
-  --fc-button-active-bg-color: #3730A3;
-  --fc-button-active-border-color: #3730A3;
-  --fc-event-bg-color: #4F46E5;
-  --fc-event-border-color: #4338CA;
-  --fc-today-bg-color: #EEF2FF;
+  --fc-button-bg-color: #3B82F6;
+  --fc-button-border-color: #3B82F6;
+  --fc-button-hover-bg-color: #60A5FA;
+  --fc-button-hover-border-color: #60A5FA;
+  --fc-button-active-bg-color: #2563EB;
+  --fc-button-active-border-color: #2563EB;
+  --fc-event-bg-color: #3B82F6;
+  --fc-event-border-color: #60A5FA;
+  --fc-today-bg-color: #EFF6FF;
 }
 
 .fc .fc-button {
