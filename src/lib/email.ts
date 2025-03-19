@@ -7,19 +7,19 @@ interface EmailNotification {
 }
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
+  host: process.env.EMAIL_SERVER_HOST,
+  port: Number(process.env.EMAIL_SERVER_PORT),
   secure: true,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.EMAIL_SERVER_USER,
+    pass: process.env.EMAIL_SERVER_PASSWORD,
   },
 });
 
 export async function sendEmailNotification({ to, subject, text }: EmailNotification) {
   try {
     await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+      from: process.env.EMAIL_FROM,
       to,
       subject,
       text,

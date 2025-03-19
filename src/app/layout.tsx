@@ -1,15 +1,16 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Providers } from './providers'
+import { Navigation } from '@/components/Navigation'
+import { Providers } from '@/components/Providers'
 import { AdminKeyHandler } from '@/components/AdminKeyHandler'
 import { ToastProvider } from '@/components/ui/use-toast'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'ZooHotel',
-  description: 'Отель для ваших питомцев',
+  title: 'ZooHotel - Отель для животных',
+  description: 'Комфортный отель для ваших питомцев',
 }
 
 export default function RootLayout({
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ToastProvider>
           <Providers>
+            <Navigation />
             <AdminKeyHandler />
             <nav className="bg-primary text-white sticky top-0 z-50 shadow-lg">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
