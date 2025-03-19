@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { signIn, useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function SignInPage() {
   const [email, setEmail] = useState('')
@@ -10,12 +10,18 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false)
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/'
 
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.role === 'admin') {
-      router.replace('/admin')
+    if (status === 'authenticated') {
+      if (session?.user?.role === 'admin') {
+        router.replace('/admin')
+      } else {
+        router.replace(callbackUrl)
+      }
     }
-  }, [status, session, router])
+  }, [status, session, router, callbackUrl])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,7 +32,8 @@ export default function SignInPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false
+        redirect: false,
+        callbackUrl
       })
 
       if (result?.error) {
@@ -35,9 +42,8 @@ export default function SignInPage() {
         } else {
           setError(result.error || 'Произошла ошибка при входе. Пожалуйста, попробуйте снова.')
         }
-      } else if (result?.ok) {
-        router.replace('/admin')
       }
+      // Перенаправление будет обработано в useEffect
     } catch (err) {
       setError('Произошла ошибка при входе. Пожалуйста, попробуйте снова.')
     } finally {
@@ -61,8 +67,11 @@ export default function SignInPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Вход в панель администратора
+            Вход в систему
           </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Войдите в свой аккаунт для продолжения
+          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
