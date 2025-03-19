@@ -17,15 +17,19 @@ interface Pet {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
+    console.log('Received booking request:', body)
     
     // Определяем тип комнаты на основе типа питомца
     let roomType = 'other'
     const petType = body.pets?.[0]?.type?.toLowerCase()
+    console.log('Pet type:', petType)
+    
     if (petType === 'cat') {
       roomType = 'cat'
     } else if (petType === 'dog') {
       roomType = 'dog'
     }
+    console.log('Room type:', roomType)
 
     // Проверяем доступность комнаты
     const room = await prisma.room.findFirst({
@@ -36,6 +40,7 @@ export async function POST(request: Request) {
         }
       }
     })
+    console.log('Found room:', room)
 
     if (!room) {
       return new NextResponse(
@@ -48,6 +53,7 @@ export async function POST(request: Request) {
     let user = await prisma.user.findUnique({
       where: { email: body.email }
     })
+    console.log('Found user:', user)
 
     // Если пользователь не существует, создаем нового
     if (!user) {
@@ -60,6 +66,7 @@ export async function POST(request: Request) {
           password: await bcryptjs.hash(temporaryPassword, 10)
         }
       })
+      console.log('Created new user:', user)
 
       // Здесь можно отправить email с временным паролем пользователю
       try {
@@ -79,6 +86,7 @@ export async function POST(request: Request) {
           phone: body.phone || user.phone
         }
       })
+      console.log('Updated user:', user)
     }
 
     // Создаем питомца
@@ -95,14 +103,17 @@ export async function POST(request: Request) {
         }
       }
     })
+    console.log('Created pet:', pet)
 
     // Форматируем даты в ISO-8601 формат
     const startDate = new Date(body.startDate).toISOString()
     const endDate = new Date(body.endDate).toISOString()
+    console.log('Dates:', { startDate, endDate })
 
     // Рассчитываем общую стоимость
     const days = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))
     const totalPrice = days * room.price
+    console.log('Price calculation:', { days, totalPrice })
 
     // Создаем бронирование
     const booking = await prisma.booking.create({
@@ -121,14 +132,16 @@ export async function POST(request: Request) {
         user: true
       }
     })
+    console.log('Created booking:', booking)
 
     // Обновляем количество доступных мест
-    await prisma.room.update({
+    const updatedRoom = await prisma.room.update({
       where: { id: room.id },
       data: {
         available: room.available - 1
       }
     })
+    console.log('Updated room availability:', updatedRoom)
 
     // Отправляем email-уведомление о бронировании
     try {
@@ -143,9 +156,17 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ booking })
   } catch (error) {
-    console.error('Error creating booking:', error)
+    console.error('Detailed error creating booking:', error)
+    if (error instanceof Error) {
+      console.error('Error name:', error.name)
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
     return new NextResponse(
-      JSON.stringify({ error: 'Internal Server Error' }),
+      JSON.stringify({ 
+        error: 'Internal Server Error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
       { status: 500 }
     )
   }
