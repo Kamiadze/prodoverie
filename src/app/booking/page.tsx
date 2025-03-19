@@ -1,17 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { useSession } from 'next-auth/react'
-
-interface Pet {
-  name: string
-  type: string
-  age: string
-  breed: string
-  sharedWith?: string
-}
 
 interface RoomAvailability {
   total: number
@@ -45,7 +35,6 @@ const ROOM_PRICES = {
 }
 
 export default function BookingPage() {
-  const { data: session } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -114,12 +103,13 @@ export default function BookingPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Ошибка при создании бронирования')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Ошибка при создании бронирования')
       }
 
       router.push('/booking/success')
     } catch (err) {
-      setError('Произошла ошибка при бронировании. Пожалуйста, попробуйте снова.')
+      setError(err instanceof Error ? err.message : 'Произошла ошибка при бронировании. Пожалуйста, попробуйте снова.')
     } finally {
       setLoading(false)
     }

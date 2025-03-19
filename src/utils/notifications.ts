@@ -35,12 +35,13 @@ try {
   console.log('Twilio is not available:', error);
 }
 
-interface NotificationData {
-  type: 'booking_status_update'
-  booking: Booking & {
+type NotificationData = {
+  type: 'booking_status_update' | 'booking_confirmation' | 'temporary_password'
+  booking?: Booking & {
     pet: any
     user: any
   }
+  password?: string
 }
 
 export async function sendEmailNotification(email: string, data: NotificationData) {
@@ -51,11 +52,12 @@ export async function sendEmailNotification(email: string, data: NotificationDat
 
     switch (data.type) {
       case 'booking_status_update':
+        if (!data.booking) throw new Error('Booking data is required for status update notification');
         subject = `Обновление статуса бронирования - ${data.booking.pet.name}`;
         text = `Уважаемый(ая) ${data.booking.user.name},\n\n` +
                `Статус бронирования для вашего питомца "${data.booking.pet.name}" был обновлен.\n` +
                `Новый статус: ${data.booking.status}\n` +
-               `Даты: ${data.booking.startDate.toLocaleDateString()} - ${data.booking.endDate.toLocaleDateString()}\n\n` +
+               `Даты: ${new Date(data.booking.startDate).toLocaleDateString()} - ${new Date(data.booking.endDate).toLocaleDateString()}\n\n` +
                `С уважением,\nКоманда ZooHotel`;
         
         html = `
@@ -64,7 +66,61 @@ export async function sendEmailNotification(email: string, data: NotificationDat
             <p>Уважаемый(ая) ${data.booking.user.name},</p>
             <p>Статус бронирования для вашего питомца "${data.booking.pet.name}" был обновлен.</p>
             <p><strong>Новый статус:</strong> ${data.booking.status}</p>
-            <p><strong>Даты:</strong> ${data.booking.startDate.toLocaleDateString()} - ${data.booking.endDate.toLocaleDateString()}</p>
+            <p><strong>Даты:</strong> ${new Date(data.booking.startDate).toLocaleDateString()} - ${new Date(data.booking.endDate).toLocaleDateString()}</p>
+            <p>С уважением,<br>Команда ZooHotel</p>
+          </div>
+        `;
+        break;
+
+      case 'booking_confirmation':
+        if (!data.booking) throw new Error('Booking data is required for confirmation notification');
+        subject = `Подтверждение бронирования - ZooHotel`;
+        text = `Уважаемый(ая) ${data.booking.user.name},\n\n` +
+               `Спасибо за бронирование в ZooHotel!\n\n` +
+               `Детали бронирования:\n` +
+               `Питомец: ${data.booking.pet.name}\n` +
+               `Тип комнаты: ${data.booking.roomType}\n` +
+               `Даты: ${new Date(data.booking.startDate).toLocaleDateString()} - ${new Date(data.booking.endDate).toLocaleDateString()}\n\n` +
+               `Статус бронирования: ${data.booking.status}\n\n` +
+               `Мы свяжемся с вами для подтверждения бронирования.\n\n` +
+               `С уважением,\nКоманда ZooHotel`;
+        
+        html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #4F46E5;">Подтверждение бронирования</h2>
+            <p>Уважаемый(ая) ${data.booking.user.name},</p>
+            <p>Спасибо за бронирование в ZooHotel!</p>
+            <div style="background-color: #F3F4F6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin-top: 0;">Детали бронирования:</h3>
+              <p><strong>Питомец:</strong> ${data.booking.pet.name}</p>
+              <p><strong>Тип комнаты:</strong> ${data.booking.roomType}</p>
+              <p><strong>Даты:</strong> ${new Date(data.booking.startDate).toLocaleDateString()} - ${new Date(data.booking.endDate).toLocaleDateString()}</p>
+              <p><strong>Статус:</strong> ${data.booking.status}</p>
+            </div>
+            <p>Мы свяжемся с вами для подтверждения бронирования.</p>
+            <p>С уважением,<br>Команда ZooHotel</p>
+          </div>
+        `;
+        break;
+
+      case 'temporary_password':
+        if (!data.password) throw new Error('Password is required for temporary password notification');
+        subject = `Доступ к личному кабинету - ZooHotel`;
+        text = `Здравствуйте!\n\n` +
+               `Для вас был создан аккаунт в системе ZooHotel.\n\n` +
+               `Ваш временный пароль: ${data.password}\n\n` +
+               `Пожалуйста, измените пароль при первом входе в систему.\n\n` +
+               `С уважением,\nКоманда ZooHotel`;
+        
+        html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #4F46E5;">Доступ к личному кабинету</h2>
+            <p>Здравствуйте!</p>
+            <p>Для вас был создан аккаунт в системе ZooHotel.</p>
+            <div style="background-color: #F3F4F6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0;"><strong>Ваш временный пароль:</strong> ${data.password}</p>
+            </div>
+            <p>Пожалуйста, измените пароль при первом входе в систему.</p>
             <p>С уважением,<br>Команда ZooHotel</p>
           </div>
         `;
