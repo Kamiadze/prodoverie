@@ -19,25 +19,23 @@ export async function POST(request: Request) {
     const body = await request.json()
     
     // Определяем тип комнаты на основе типа питомца
-    let roomType = 'standard'
+    let roomType = 'other'
     if (body.pets && body.pets[0]) {
       const petType = body.pets[0].type.toLowerCase()
       if (petType === 'cat') {
-        roomType = 'Cat Room'
+        roomType = 'cat'
       } else if (petType === 'dog') {
-        roomType = 'Dog Room'
-      } else if (petType === 'bird') {
-        roomType = 'Bird Room'
-      } else if (petType === 'other') {
-        roomType = 'Other Pet Room'
+        roomType = 'dog'
       }
     }
 
     // Проверяем доступность комнаты
     const room = await prisma.room.findFirst({
       where: {
-        type: roomType,
-        available: 1
+        petType: roomType,
+        available: {
+          gt: 0
+        }
       }
     })
 
@@ -106,13 +104,7 @@ export async function POST(request: Request) {
 
     // Рассчитываем общую стоимость
     const days = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))
-    const pricePerDay = {
-      'Cat Room': 1000,
-      'Dog Room': 1200,
-      'Bird Room': 800,
-      'Other Pet Room': 900
-    }[roomType] || 0
-    const totalPrice = days * pricePerDay
+    const totalPrice = days * room.price
 
     // Создаем бронирование
     const booking = await prisma.booking.create({
@@ -129,6 +121,14 @@ export async function POST(request: Request) {
       include: {
         pet: true,
         user: true
+      }
+    })
+
+    // Обновляем количество доступных мест
+    await prisma.room.update({
+      where: { id: room.id },
+      data: {
+        available: room.available - 1
       }
     })
 
