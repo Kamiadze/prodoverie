@@ -4,44 +4,54 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Очищаем существующие комнаты
-  await prisma.room.deleteMany()
+  // Создаем администратора
+  const adminPassword = await bcrypt.hash('admin123', 10)
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
+      email: 'admin@example.com',
+      password: adminPassword,
+      name: 'Admin',
+      role: 'admin',
+      phone: '+7 (000) 000-00-00'
+    },
+  })
 
-  // Создаем комнаты с правильным количеством мест
+  // Создаем комнаты для разных типов питомцев
   const rooms = [
     {
       type: 'cat',
-      price: 1000,
-      capacity: 1,
-      available: 4,
-      total: 4,
-      petType: 'cat'
+      petType: 'cat',
+      total: 5,
+      available: 5,
+      price: 300
     },
     {
       type: 'dog',
-      price: 1200,
-      capacity: 1,
-      available: 6,
-      total: 6,
-      petType: 'dog'
+      petType: 'dog',
+      total: 5,
+      available: 5,
+      price: 500
     },
     {
       type: 'other',
-      price: 900,
-      capacity: 1,
-      available: 4,
-      total: 4,
-      petType: 'other'
+      petType: 'other',
+      total: 3,
+      available: 3,
+      price: 100
     }
   ]
 
   for (const room of rooms) {
-    await prisma.room.create({
-      data: room
+    await prisma.room.upsert({
+      where: { type: room.type },
+      update: room,
+      create: room
     })
   }
 
-  console.log('Rooms initialized successfully')
+  console.log({ admin, rooms })
 }
 
 main()
