@@ -23,9 +23,9 @@ export async function GET() {
 
     // Подсчитываем свободные места для каждого типа комнаты
     const availableRooms = rooms.reduce((acc, room) => {
-      acc[room.petType] = {
+      acc[room.type] = {
         total: room.total,
-        available: room.total - (occupiedSpots[room.petType] || 0),
+        available: room.total - (occupiedSpots[room.type] || 0),
         price: room.price
       }
       return acc

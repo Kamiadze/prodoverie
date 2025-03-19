@@ -87,7 +87,7 @@ export default function BookingPage() {
     const type = petType.toLowerCase()
     if (type === 'cat') return 'cat'
     if (type === 'dog') return 'dog'
-    if (type === 'bird') return 'other'
+    if (type === 'bird' || type === 'other') return 'other'
     return 'other'
   }
 
