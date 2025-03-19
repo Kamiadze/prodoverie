@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     // Проверяем доступность комнаты
     const room = await prisma.room.findFirst({
       where: {
-        type: roomType,
+        petType: roomType,
         available: {
           gt: 0
         }
@@ -94,8 +94,8 @@ export async function POST(request: Request) {
       data: {
         name: body.pets[0].name,
         type: body.pets[0].type,
-        age: body.pets[0].age,
-        breed: body.pets[0].breed,
+        age: parseInt(body.pets[0].age),
+        breed: body.pets[0].breed || null,
         owner: {
           connect: {
             id: user.id
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
 
     // Рассчитываем общую стоимость
     const days = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))
-    const totalPrice = days * room.price
+    const totalPrice = parseFloat((days * room.price).toFixed(2))
     console.log('Price calculation:', { days, totalPrice })
 
     // Создаем бронирование
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
         startDate,
         endDate,
         status: 'pending',
-        notes: body.notes || '',
+        notes: body.notes || null,
         roomType,
         userId: user.id,
         petId: pet.id,
