@@ -25,6 +25,7 @@ interface BookingForm {
     breed?: string
   }[]
   notes?: string
+  sharedWithPetId?: string
 }
 
 const ROOM_PRICES = {
@@ -223,6 +224,24 @@ export default function BookingPage() {
                         Общая стоимость: {totalPrice} ₽
                       </p>
                     )}
+                  </div>
+                )}
+
+                {petType === 'dog' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Совместное размещение</label>
+                    <div className="mt-2">
+                      <label className="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          {...register('sharedWithPetId')}
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">
+                          Разместить с другим питомцем (при наличии свободного места)
+                        </span>
+                      </label>
+                    </div>
                   </div>
                 )}
 

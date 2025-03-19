@@ -15,20 +15,17 @@ export async function GET() {
       }
     })
 
-    // Подсчитываем занятые места для каждого типа животных
+    // Подсчитываем занятые места для каждого типа комнаты
     const occupiedSpots = activeBookings.reduce((acc, booking) => {
-      const room = rooms.find(r => r.type === booking.roomType)
-      if (room) {
-        acc[room.petType] = (acc[room.petType] || 0) + 1
-      }
+      acc[booking.roomType] = (acc[booking.roomType] || 0) + 1
       return acc
     }, {} as Record<string, number>)
 
-    // Подсчитываем свободные места для каждого типа животных
+    // Подсчитываем свободные места для каждого типа комнаты
     const availableRooms = rooms.reduce((acc, room) => {
-      acc[room.petType] = {
+      acc[room.type] = {
         total: room.total,
-        available: room.total - (occupiedSpots[room.petType] || 0)
+        available: room.total - (occupiedSpots[room.type] || 0)
       }
       return acc
     }, {} as Record<string, { total: number; available: number }>)
