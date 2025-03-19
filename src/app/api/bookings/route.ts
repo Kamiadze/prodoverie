@@ -20,19 +20,17 @@ export async function POST(request: Request) {
     
     // Определяем тип комнаты на основе типа питомца
     let roomType = 'other'
-    if (body.pets && body.pets[0]) {
-      const petType = body.pets[0].type.toLowerCase()
-      if (petType === 'cat') {
-        roomType = 'cat'
-      } else if (petType === 'dog') {
-        roomType = 'dog'
-      }
+    const petType = body.petType?.toLowerCase()
+    if (petType === 'cat') {
+      roomType = 'cat'
+    } else if (petType === 'dog') {
+      roomType = 'dog'
     }
 
     // Проверяем доступность комнаты
     const room = await prisma.room.findFirst({
       where: {
-        petType: roomType,
+        type: roomType,
         available: {
           gt: 0
         }
@@ -86,10 +84,10 @@ export async function POST(request: Request) {
     // Создаем питомца
     const pet = await prisma.pet.create({
       data: {
-        name: body.pets[0].name,
-        type: body.pets[0].type,
-        age: body.pets[0].age,
-        breed: body.pets[0].breed,
+        name: body.petName,
+        type: body.petType,
+        age: body.petAge,
+        breed: body.petBreed,
         owner: {
           connect: {
             id: user.id
