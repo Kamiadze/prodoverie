@@ -124,7 +124,7 @@ export async function POST(request: Request) {
         roomType,
         userId: user.id,
         petId: pet.id,
-        totalPrice
+        totalPrice: totalPrice
       },
       include: {
         pet: true,

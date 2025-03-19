@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -51,6 +51,7 @@ model Booking {
   roomType    String
   notes       String?
   sharedWithPetId String? // ID питомца, с которым делится вольер
+  totalPrice  Float    // Общая стоимость бронирования
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
