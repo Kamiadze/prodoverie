@@ -24,6 +24,11 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.5",
     "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/nodemailer": "^6.4.14",
     "autoprefixer": "^10.0.1",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
@@ -41,18 +46,13 @@
     "tailwindcss": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
     "twilio": "^5.5.0",
+    "typescript": "^5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20",
-    "@types/nodemailer": "^6.4.14",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
     "prisma": "^5.10.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "ts-node": "^10.9.2"
   }
 }
