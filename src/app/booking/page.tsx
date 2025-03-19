@@ -63,6 +63,7 @@ export default function BookingPage() {
     fetch('/api/rooms')
       .then(res => res.json())
       .then(data => {
+        console.log('Received rooms data:', data.availableRooms)
         setAvailableRooms(data.availableRooms)
       })
       .catch(err => {
@@ -87,7 +88,6 @@ export default function BookingPage() {
     const type = petType.toLowerCase()
     if (type === 'cat') return 'cat'
     if (type === 'dog') return 'dog'
-    if (type === 'bird' || type === 'other') return 'other'
     return 'other'
   }
 
