@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 interface RoomAvailability {
   total: number
   available: number
+  price: number
 }
 
 interface AvailableRooms {
@@ -77,16 +78,16 @@ export default function BookingPage() {
       const end = new Date(endDate)
       const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
       const roomType = getRoomType(petType)
-      const pricePerDay = ROOM_PRICES[roomType] || 0
+      const pricePerDay = availableRooms[roomType]?.price || 0
       setTotalPrice(days * pricePerDay)
     }
-  }, [startDate, endDate, petType])
+  }, [startDate, endDate, petType, availableRooms])
 
   const getRoomType = (petType: string) => {
     const type = petType.toLowerCase()
     if (type === 'cat') return 'cat'
     if (type === 'dog') return 'dog'
-    if (type === 'bird') return 'bird'
+    if (type === 'bird') return 'other'
     return 'other'
   }
 
@@ -217,7 +218,7 @@ export default function BookingPage() {
                       Свободно мест: {availableRooms[getRoomType(petType)].available} из {availableRooms[getRoomType(petType)].total}
                     </p>
                     <p className="text-sm text-blue-700 mt-2">
-                      Стоимость: {ROOM_PRICES[getRoomType(petType)]} ₽/сутки
+                      Стоимость: {availableRooms[getRoomType(petType)].price} ₽/сутки
                     </p>
                     {totalPrice > 0 && (
                       <p className="text-sm font-medium text-blue-700 mt-2">

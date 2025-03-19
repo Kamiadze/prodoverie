@@ -25,10 +25,11 @@ export async function GET() {
     const availableRooms = rooms.reduce((acc, room) => {
       acc[room.petType] = {
         total: room.total,
-        available: room.total - (occupiedSpots[room.petType] || 0)
+        available: room.total - (occupiedSpots[room.petType] || 0),
+        price: room.price
       }
       return acc
-    }, {} as Record<string, { total: number; available: number }>)
+    }, {} as Record<string, { total: number; available: number; price: number }>)
 
     return NextResponse.json({ availableRooms })
   } catch (error) {
