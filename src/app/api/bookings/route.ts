@@ -42,15 +42,27 @@ export async function POST(request: Request) {
       }
     }
 
-    // Создаем пользователя, если его еще нет
-    const user = await prisma.user.upsert({
-      where: { email: body.email },
-      update: {},
-      create: {
-        name: body.name,
-        email: body.email,
-        phone: body.phone,
-        password: await bcryptjs.hash('defaultPassword123', 10) // Временный пароль
+    // Проверяем доступность комнаты
+    const room = await prisma.room.findFirst({
+      where: {
+        type: roomType,
+        available: 1
+      }
+    })
+
+    if (!room) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Нет свободных комнат данного типа' }),
+        { status: 400 }
+      )
+    }
+
+    // Используем существующего пользователя из сессии
+    const user = await prisma.user.update({
+      where: { email: session.user.email },
+      data: {
+        phone: body.phone || undefined,
+        name: body.name || undefined
       }
     })
 

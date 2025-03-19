@@ -248,6 +248,39 @@ export default function AdminPage() {
 
   const activeBookings = bookings.filter(b => b.status === 'active').length
   const pendingBookings = bookings.filter(b => b.status === 'pending').length
+  const totalRevenue = bookings
+    .filter(b => b.status === 'completed')
+    .reduce((sum, booking) => sum + (booking.totalPrice || 0), 0)
+
+  const renderStatistics = () => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Активные бронирования</h3>
+          <p className="text-3xl font-bold text-primary">{activeBookings}</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Ожидают подтверждения</h3>
+          <p className="text-3xl font-bold text-secondary">{pendingBookings}</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Общая выручка</h3>
+          <p className="text-3xl font-bold text-green-600">{totalRevenue} ₽</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Свободные места</h3>
+          <div className="space-y-2">
+            {Object.entries(availableRooms).map(([type, data]) => (
+              <div key={type} className="flex justify-between items-center">
+                <span className="text-gray-600">{type}:</span>
+                <span className="font-medium">{data.available}/{data.total}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const calendarEvents = bookings
     .filter(booking => ['active', 'pending'].includes(booking.status))
@@ -290,255 +323,223 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-accent-light py-12">
-      {showLogoutWarning && (
-        <div className="fixed top-0 left-0 right-0 bg-yellow-100 border-b border-yellow-400 text-yellow-700 px-4 py-3 z-50">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <div>
-              <p className="font-medium">Внимание!</p>
-              <p className="text-sm">Вы будете автоматически выйдены из системы через 30 секунд из-за неактивности.</p>
-            </div>
-            <div className="flex space-x-4">
-              <button
-                onClick={() => {
-                  setShowLogoutWarning(false)
-                  setLastActivity(Date.now())
-                }}
-                className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-              >
-                Остаться
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-              >
-                Выйти
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-accent-light p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-primary">
+            Панель администратора
+          </h1>
+          <button
+            onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+          >
+            Выйти
+          </button>
         </div>
-      )}
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-primary">
-              Панель администратора
-            </h1>
-            <div className="flex space-x-4">
-              <button
-                onClick={() => setActiveTab('bookings')}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  activeTab === 'bookings'
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Брони
-              </button>
-              <button
-                onClick={() => setActiveTab('calendar')}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  activeTab === 'calendar'
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Календарь
-              </button>
-            </div>
+
+        {showLogoutWarning && (
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-6">
+            <p>
+              Вы будете автоматически выйти из системы через 30 секунд из-за отсутствия активности.
+              Пожалуйста, сделайте что-нибудь, чтобы остаться в системе.
+            </p>
           </div>
+        )}
 
-          {error && (
-            <div className="bg-red-50 text-red-800 p-4 rounded-lg mb-8">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+            {error}
+          </div>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-primary/10 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-primary mb-2">Активные брони</h3>
-              <p className="text-3xl font-bold text-primary">{activeBookings}</p>
-            </div>
-            <div className="bg-secondary/10 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-secondary mb-2">Ожидают подтверждения</h3>
-              <p className="text-3xl font-bold text-secondary">{pendingBookings}</p>
-            </div>
-            <div className="bg-nature/10 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-nature mb-2">Свободные места</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Для кошек:</span>
-                  <span className="text-lg font-semibold">{availableRooms.cat?.available || 0} из {availableRooms.cat?.total || 0}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Для собак:</span>
-                  <span className="text-lg font-semibold">{availableRooms.dog?.available || 0} из {availableRooms.dog?.total || 0}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Для других:</span>
-                  <span className="text-lg font-semibold">{availableRooms.other?.available || 0} из {availableRooms.other?.total || 0}</span>
-                </div>
-              </div>
-            </div>
-            <div className="bg-accent/10 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-accent mb-2">Общая стоимость</h3>
-              <p className="text-3xl font-bold text-accent">
-                {bookings
-                  .filter(b => b.status === 'active')
-                  .reduce((sum, booking) => sum + (Number(booking.totalPrice) || 0), 0)
-                  .toLocaleString('ru-RU')} ₽
-              </p>
-            </div>
+        {renderStatistics()}
+
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex space-x-4 mb-6">
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className={`px-4 py-2 rounded ${
+                activeTab === 'bookings'
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Список бронирований
+            </button>
+            <button
+              onClick={() => setActiveTab('calendar')}
+              className={`px-4 py-2 rounded ${
+                activeTab === 'calendar'
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Календарь
+            </button>
           </div>
 
           {activeTab === 'bookings' ? (
-            <div className="overflow-x-auto mb-8">
-              <h2 className="text-xl font-semibold text-primary mb-4">Активные и ожидающие брони</h2>
+            <div className="space-y-6">
               {loading ? (
-                <div className="text-center py-4">Загрузка...</div>
-              ) : (
-                <div className="space-y-6">
-                  {Object.entries(groupedBookings).map(([email, { user, bookings: ownerBookings }]) => (
-                    <div key={email} className="bg-white rounded-lg shadow-md overflow-hidden">
-                      <div 
-                        className="p-4 bg-gray-50 cursor-pointer hover:bg-gray-100"
-                        onClick={() => toggleOwnerCollapse(email)}
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
-                            <p className="text-sm text-gray-600">{user.email}</p>
-                            {user.phone && <p className="text-sm text-gray-600">{user.phone}</p>}
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-semibold text-accent">
-                              {ownerBookings.reduce((sum, booking) => sum + (Number(booking.totalPrice) || 0), 0).toLocaleString('ru-RU')} ₽
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {ownerBookings.length} {ownerBookings.length === 1 ? 'бронирование' : 'бронирования'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      {!collapsedOwners.includes(email) && (
-                        <div className="divide-y divide-gray-200">
-                          {ownerBookings.map(booking => (
-                            <div key={booking.id} className="p-4">
-                              <div className="flex justify-between items-start">
-                                <div className="space-y-2">
-                                  <div className="flex items-center space-x-2">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                      booking.status === 'active' 
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-yellow-100 text-yellow-800'
-                                    }`}>
-                                      {booking.status === 'active' ? 'Активное' : 'Ожидает'}
-                                    </span>
-                                    <span className="text-sm text-gray-600">
-                                      {new Date(booking.startDate).toLocaleDateString('ru-RU')} - 
-                                      {new Date(booking.endDate).toLocaleDateString('ru-RU')}
-                                    </span>
-                                  </div>
-                                  <div className="text-sm">
-                                    <p className="font-medium text-gray-900">{booking.pet.name}</p>
-                                    <p className="text-gray-600">{booking.pet.type} • {booking.pet.breed || 'Порода не указана'}</p>
-                                    <p className="text-gray-600">{booking.pet.age} лет</p>
-                                  </div>
-                                  <div className="text-sm text-gray-600">
-                                    <p>Тип номера: {booking.roomType}</p>
-                                    <p>Время заезда: {booking.checkInTime}</p>
-                                    {booking.notes && <p>Примечания: {booking.notes}</p>}
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-lg font-semibold text-accent">
-                                    {(Number(booking.totalPrice) || 0).toLocaleString('ru-RU')} ₽
-                                  </p>
-                                  <div className="mt-2 space-x-2">
-                                    {booking.status === 'pending' && (
-                                      <div className="flex gap-2">
-                                        <button
-                                          onClick={() => handleStatusUpdate(booking.id, 'active')}
-                                          disabled={updating === booking.id}
-                                          className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
-                                        >
-                                          {updating === booking.id ? 'Updating...' : 'Approve'}
-                                        </button>
-                                        <button
-                                          onClick={() => handleStatusUpdate(booking.id, 'rejected')}
-                                          disabled={updating === booking.id}
-                                          className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
-                                        >
-                                          {updating === booking.id ? 'Updating...' : 'Reject'}
-                                        </button>
-                                      </div>
-                                    )}
-                                    {booking.status === 'active' && (
-                                      <button
-                                        onClick={() => handleStatusUpdate(booking.id, 'completed')}
-                                        disabled={updating === booking.id}
-                                        className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-                                      >
-                                        {updating === booking.id ? 'Updating...' : 'Complete'}
-                                      </button>
-                                    )}
-                                    {(booking.status === 'pending' || booking.status === 'active') && (
-                                      <button
-                                        onClick={() => handleStatusUpdate(booking.id, 'cancelled')}
-                                        disabled={updating === booking.id}
-                                        className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50"
-                                      >
-                                        {updating === booking.id ? 'Updating...' : 'Cancel'}
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-4 text-gray-600">Загрузка бронирований...</p>
                 </div>
+              ) : bookings.length === 0 ? (
+                <p className="text-center py-12 text-gray-500">Нет бронирований</p>
+              ) : (
+                bookings.map(booking => (
+                  <div
+                    key={booking.id}
+                    className="bg-gray-50 rounded-lg p-6 space-y-4"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-semibold">
+                          Питомец: {booking.pet.name}
+                        </h3>
+                        <p className="text-gray-600">
+                          Тип: {booking.pet.type}, Возраст: {booking.pet.age}
+                          {booking.pet.breed && `, Порода: ${booking.pet.breed}`}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">
+                          Создано:{' '}
+                          {new Date(booking.createdAt).toLocaleDateString('ru-RU')}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          ID: {booking.id}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-medium text-gray-700">
+                          Информация о владельце:
+                        </h4>
+                        <p>Имя: {booking.user.name}</p>
+                        <p>Email: {booking.user.email}</p>
+                        {booking.user.phone && <p>Телефон: {booking.user.phone}</p>}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-700">
+                          Детали бронирования:
+                        </h4>
+                        <p>
+                          Даты: {new Date(booking.startDate).toLocaleDateString('ru-RU')} -{' '}
+                          {new Date(booking.endDate).toLocaleDateString('ru-RU')}
+                        </p>
+                        <p>Тип комнаты: {booking.roomType}</p>
+                        {booking.totalPrice && (
+                          <p>Стоимость: {booking.totalPrice} ₽</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {booking.notes && (
+                      <div>
+                        <h4 className="font-medium text-gray-700">
+                          Дополнительные заметки:
+                        </h4>
+                        <p className="text-gray-600">{booking.notes}</p>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center pt-4">
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                            booking.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : booking.status === 'active'
+                              ? 'bg-green-100 text-green-800'
+                              : booking.status === 'completed'
+                              ? 'bg-blue-100 text-blue-800'
+                              : booking.status === 'cancelled'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {booking.status === 'pending'
+                            ? 'Ожидает'
+                            : booking.status === 'active'
+                            ? 'Активно'
+                            : booking.status === 'completed'
+                            ? 'Завершено'
+                            : booking.status === 'cancelled'
+                            ? 'Отменено'
+                            : booking.status}
+                        </span>
+                      </div>
+                      <div className="flex space-x-2">
+                        {booking.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(booking.id, 'active')
+                              }
+                              disabled={updating === booking.id}
+                              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50 transition-colors"
+                            >
+                              {updating === booking.id
+                                ? 'Обновление...'
+                                : 'Подтвердить'}
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(booking.id, 'cancelled')
+                              }
+                              disabled={updating === booking.id}
+                              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50 transition-colors"
+                            >
+                              {updating === booking.id
+                                ? 'Обновление...'
+                                : 'Отменить'}
+                            </button>
+                          </>
+                        )}
+                        {booking.status === 'active' && (
+                          <button
+                            onClick={() =>
+                              handleStatusUpdate(booking.id, 'completed')
+                            }
+                            disabled={updating === booking.id}
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                          >
+                            {updating === booking.id
+                              ? 'Обновление...'
+                              : 'Завершить'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           ) : (
-            <div className="mt-8">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <FullCalendar
-                  plugins={[dayGridPlugin, interactionPlugin]}
-                  initialView="dayGridMonth"
-                  events={calendarEvents}
-                  locale={ruLocale}
-                  headerToolbar={{
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,dayGridWeek'
-                  }}
-                  eventContent={(eventInfo) => (
-                    <div className="p-1">
-                      <div className="font-semibold">{eventInfo.event.title}</div>
-                      <div className="text-xs">
-                        {eventInfo.event.extendedProps.user.name}
-                      </div>
-                    </div>
-                  )}
-                  eventDidMount={(info) => {
-                    const tooltip = `
-                      Питомец: ${info.event.extendedProps.pet?.name || 'Без питомца'}
-                      Владелец: ${info.event.extendedProps.user.name}
-                      Телефон: ${info.event.extendedProps.user.phone || 'Не указан'}
-                      Тип номера: ${info.event.extendedProps.roomType}
-                      Статус: ${info.event.extendedProps.status === 'active' ? 'Подтверждено' : 'Ожидает'}
-                    `
-                    info.el.title = tooltip
-                  }}
-                  height="auto"
-                  aspectRatio={2}
-                />
-              </div>
+            <div className="bg-white rounded-lg">
+              <FullCalendar
+                plugins={[dayGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                locale={ruLocale}
+                events={bookings.map(booking => ({
+                  title: `${booking.pet.name} (${booking.roomType})`,
+                  start: booking.startDate,
+                  end: booking.endDate,
+                  backgroundColor:
+                    booking.status === 'pending'
+                      ? '#FCD34D'
+                      : booking.status === 'active'
+                      ? '#34D399'
+                      : booking.status === 'completed'
+                      ? '#60A5FA'
+                      : '#F87171',
+                }))}
+                height="auto"
+              />
             </div>
           )}
         </div>
