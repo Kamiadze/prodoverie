@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || session.user.role !== 'admin') {
+    if (!session?.user) {
       return new NextResponse(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401 }
@@ -117,14 +117,18 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || session.user.role !== 'admin') {
+    if (!session?.user) {
       return new NextResponse(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401 }
       )
     }
 
+    // Если пользователь не админ, показываем только его бронирования
+    const where = session.user.role === 'admin' ? {} : { userId: session.user.id }
+
     const bookings = await prisma.booking.findMany({
+      where,
       include: {
         pet: true,
         user: true
