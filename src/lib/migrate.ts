@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 export async function migrate() {
   try {
     // Проверяем, существует ли таблица _prisma_migrations
-    const result = await prisma.$queryRaw`
+    const result = await prisma.$queryRaw<Array<{ name: string }>>`
       SELECT name FROM sqlite_master WHERE type='table' AND name='_prisma_migrations'
     `
     
