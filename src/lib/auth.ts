@@ -32,10 +32,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Неверный пароль')
         }
 
-        if (user.role !== 'admin') {
-          throw new Error('У вас нет прав для доступа к панели администратора')
-        }
-
         return {
           id: user.id,
           email: user.email,
