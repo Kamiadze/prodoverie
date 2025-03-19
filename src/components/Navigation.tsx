@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Calendar, Home, LogIn, LogOut, UserCircle } from 'lucide-react';
-import { signOut, useSession } from 'next-auth/react';
+import { Calendar, Home, UserCircle } from 'lucide-react';
 
 const navigation = [
   { name: 'Главная', href: '/', icon: Home },
@@ -14,7 +13,6 @@ const navigation = [
 
 export function Navigation() {
   const pathname = usePathname();
-  const { data: session } = useSession();
 
   return (
     <nav className="bg-white shadow-sm">
@@ -46,25 +44,6 @@ export function Navigation() {
                 );
               })}
             </div>
-          </div>
-          <div className="flex items-center">
-            {session ? (
-              <button
-                onClick={() => signOut()}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <LogOut className="h-5 w-5 mr-1" />
-                Выйти
-              </button>
-            ) : (
-              <Link
-                href="/auth/login"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <LogIn className="h-5 w-5 mr-1" />
-                Войти
-              </Link>
-            )}
           </div>
         </div>
       </div>
