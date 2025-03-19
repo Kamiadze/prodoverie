@@ -29,10 +29,10 @@ interface BookingForm {
 }
 
 const ROOM_PRICES = {
-  'Cat Room': 1000,
-  'Dog Room': 1200,
-  'Bird Room': 800,
-  'Other Pet Room': 900
+  'cat': 1000,
+  'dog': 1200,
+  'bird': 800,
+  'other': 900
 }
 
 export default function BookingPage() {
@@ -84,10 +84,10 @@ export default function BookingPage() {
 
   const getRoomType = (petType: string) => {
     const type = petType.toLowerCase()
-    if (type === 'cat') return 'Cat Room'
-    if (type === 'dog') return 'Dog Room'
-    if (type === 'bird') return 'Bird Room'
-    return 'Other Pet Room'
+    if (type === 'cat') return 'cat'
+    if (type === 'dog') return 'dog'
+    if (type === 'bird') return 'bird'
+    return 'other'
   }
 
   const onSubmit = async (data: BookingForm) => {
